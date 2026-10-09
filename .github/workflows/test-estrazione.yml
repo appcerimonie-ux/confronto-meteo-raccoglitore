@@ -1,0 +1,45 @@
+name: Test estrazione raccoglitore
+
+# Si avvia solo a mano, dalla scheda "Actions" del repository (bottone "Run workflow").
+# Non scrive su Firestore, non tocca l'account MeteoHub: scarica solo un pacchetto
+# pubblico (nessun login) e prova a leggerlo. Serve solo a verificare che il
+# meccanismo di download + lettura GRIB2 funzioni, prima di costruire il
+# raccoglitore vero che girera' ogni 3 ore.
+
+on:
+  workflow_dispatch:
+    inputs:
+      dataset:
+        description: "Dataset MeteoHub da provare"
+        required: false
+        default: "WRF_DA_ITA"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Scarica il codice del repository
+        uses: actions/checkout@v4
+
+      - name: Installa Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Installa la libreria di sistema eccodes
+        run: sudo apt-get update && sudo apt-get install -y libeccodes0 libeccodes-tools
+
+      - name: Installa le dipendenze Python
+        run: pip install -r raccoglitore/requirements.txt
+
+      - name: Esegui il test di estrazione
+        working-directory: raccoglitore
+        run: python estrai_test_V1.py "${{ github.event.inputs.dataset }}"
+
+      - name: Carica il risultato come allegato della run
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: estrazione-test
+          path: raccoglitore/estrazione_test.json
+          if-no-files-found: ignore
