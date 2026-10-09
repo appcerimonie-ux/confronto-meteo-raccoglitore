@@ -34,7 +34,7 @@ jobs:
 
       - name: Esegui il test di estrazione
         working-directory: raccoglitore
-        run: python estrai_test_V1.py "${{ github.event.inputs.dataset }}"
+        run: python estrai_test_V2.py "${{ github.event.inputs.dataset }}"
 
       - name: Carica il risultato come allegato della run
         if: always()
