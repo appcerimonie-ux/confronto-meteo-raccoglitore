@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-# Confronto Meteo - Raccoglitore - Test di estrazione V1
+# Confronto Meteo - Raccoglitore - Test di estrazione V2
+# (V2: corretto un errore con il campo "step", che eccodes restituisce a volte come
+#  numero e a volte come testo tipo "0-3" per le variabili cumulate come la pioggia;
+#  ora si usa "endStep", che e' sempre un numero)
 #
 # Cosa fa:
 #  1. Scarica dall'opendata pubblico di MeteoHub (nessun account richiesto)
@@ -17,7 +20,7 @@
 #
 # Uso in locale (richiede la libreria di sistema eccodes, difficile su Windows):
 #   pip install -r requirements.txt
-#   python estrai_test_V1.py
+#   python estrai_test_V2.py
 #
 # Uso pensato (consigliato): dentro GitHub Actions, dove la libreria di sistema
 # si installa con un comando apt (vedi .github/workflows/test-estrazione.yml).
@@ -29,7 +32,7 @@ import sys
 import time
 import urllib.request
 
-VERSIONE = "V1"
+VERSIONE = "V2"
 BASE = "https://meteohub.agenziaitaliameteo.it"
 QUI = os.path.dirname(os.path.abspath(__file__))
 
@@ -110,7 +113,9 @@ def main():
                 break
             try:
                 short = eccodes.codes_get(gid, "shortName")
-                step = eccodes.codes_get(gid, "step")
+                # "endStep" e' sempre un numero intero (anche per le variabili cumulate come
+                # la pioggia, dove "step" puo' essere un testo tipo "0-3").
+                step = eccodes.codes_get(gid, "endStep")
                 riepilogo.setdefault(short, set()).add(step)
                 if short in VARIABILI_UTILI:
                     messaggi_utili.append((short, step, gid))
