@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-# Confronto Meteo - Raccoglitore - Test di estrazione V2
-# (V2: corretto un errore con il campo "step", che eccodes restituisce a volte come
-#  numero e a volte come testo tipo "0-3" per le variabili cumulate come la pioggia;
-#  ora si usa "endStep", che e' sempre un numero)
+# Confronto Meteo - Raccoglitore - Test di estrazione V3
+# (V2: provato a usare "endStep" invece di "step" per il numero di ore di previsione.
+#  V3: anche "endStep" puo' arrivare come testo invece che numero (dipende dal tipo di
+#  campo dentro il GRIB2); ora il valore viene convertito a numero esplicitamente,
+#  qualunque cosa restituisca eccodes)
 #
 # Cosa fa:
 #  1. Scarica dall'opendata pubblico di MeteoHub (nessun account richiesto)
@@ -20,7 +21,7 @@
 #
 # Uso in locale (richiede la libreria di sistema eccodes, difficile su Windows):
 #   pip install -r requirements.txt
-#   python estrai_test_V2.py
+#   python estrai_test_V3.py
 #
 # Uso pensato (consigliato): dentro GitHub Actions, dove la libreria di sistema
 # si installa con un comando apt (vedi .github/workflows/test-estrazione.yml).
@@ -32,7 +33,7 @@ import sys
 import time
 import urllib.request
 
-VERSIONE = "V2"
+VERSIONE = "V3"
 BASE = "https://meteohub.agenziaitaliameteo.it"
 QUI = os.path.dirname(os.path.abspath(__file__))
 
@@ -45,6 +46,21 @@ with open(os.path.join(QUI, "localita.json"), encoding="utf-8") as fh:
 
 # variabili che ci interessano per il confronto meteo (temperatura 2m, pioggia, nuvolosita', vento)
 VARIABILI_UTILI = ["2t", "t2m", "tp", "tprate", "prate", "tcc", "10si", "10u", "10v"]
+
+
+def passo_numero(valore):
+    """Converte il passo di previsione (endStep) in un numero intero, qualunque sia
+    il formato restituito da eccodes (a volte un numero, a volte un testo tipo "0-3")."""
+    try:
+        return int(valore)
+    except (TypeError, ValueError):
+        pass
+    testo = str(valore)
+    pezzo = testo.split("-")[-1].strip()
+    try:
+        return int(pezzo)
+    except ValueError:
+        return 0
 
 
 def scarica_json(url):
@@ -113,9 +129,7 @@ def main():
                 break
             try:
                 short = eccodes.codes_get(gid, "shortName")
-                # "endStep" e' sempre un numero intero (anche per le variabili cumulate come
-                # la pioggia, dove "step" puo' essere un testo tipo "0-3").
-                step = eccodes.codes_get(gid, "endStep")
+                step = passo_numero(eccodes.codes_get(gid, "endStep"))
                 riepilogo.setdefault(short, set()).add(step)
                 if short in VARIABILI_UTILI:
                     messaggi_utili.append((short, step, gid))
