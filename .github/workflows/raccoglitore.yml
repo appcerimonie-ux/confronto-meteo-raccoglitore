@@ -1,0 +1,41 @@
+name: Raccoglitore meteo italiano
+
+# Gira da solo ogni 3 ore, e si puo' anche avviare a mano dalla scheda "Actions"
+# col bottone "Run workflow" per un test.
+#
+# Scarica i modelli italiani in modelli.json, estrae i dati per le localita' in
+# localita.json e scrive su Firestore. Richiede il secret FIREBASE_SERVICE_ACCOUNT
+# (vedi istruzioni). BOLAM e' stato tolto (8 km troppo largo per distinguere le
+# localita' seguite, spesso a meno di 10 km l'una dall'altra): questo libera
+# margine sui minuti gratuiti di GitHub Actions per tornare a ogni 3 ore invece
+# che ogni 6.
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: "0 */3 * * *"
+
+jobs:
+  raccogli:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Scarica il codice del repository
+        uses: actions/checkout@v4
+
+      - name: Installa Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Installa la libreria di sistema eccodes
+        run: sudo apt-get update && sudo apt-get install -y libeccodes0 libeccodes-tools
+
+      - name: Installa le dipendenze Python
+        run: pip install -r raccoglitore/requirements.txt
+
+      - name: Esegui il raccoglitore
+        working-directory: raccoglitore
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: python raccoglitore_V1.py
