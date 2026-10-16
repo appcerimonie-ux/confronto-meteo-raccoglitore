@@ -1,0 +1,5 @@
+[
+  {"id": "icon2i", "nome": "ICON-2I", "dataset": "ICON_2I_SURFACE_PRESSURE_LEVELS", "fonte": "ItaliaMeteo", "risoluzione_km": 2.2},
+  {"id": "moloch", "nome": "MOLOCH", "dataset": "MOLOCH", "fonte": "CNR-ISAC", "risoluzione_km": 1.2},
+  {"id": "wrf_radar", "nome": "WRF radar", "dataset": "WRF_DA_ITA", "fonte": "CIMA", "risoluzione_km": 2.5}
+]
