@@ -1,6 +1,6 @@
 [
   {"id": "minervino", "nome": "Minervino di Lecce", "lat": 40.09025, "lon": 18.42139},
-  {"id": "cala-balcani", "nome": "Cala dei Balcani", "lat": 40.148, "lon": 18.4858, "nota": "PROVVISORIO: centro del comune di Otranto. Sostituire con le coordinate esatte della struttura (GPS da Google Maps sul punto esatto)."},
+  {"id": "cala-balcani", "nome": "Cala dei Balcani", "lat": 40.036461, "lon": 18.457561},
   {"id": "lecce", "nome": "Lecce", "lat": 40.3533, "lon": 18.174},
   {"id": "gallipoli", "nome": "Gallipoli", "lat": 40.0562, "lon": 17.9788},
   {"id": "leuca", "nome": "Santa Maria di Leuca", "lat": 39.8003, "lon": 18.3567},
